@@ -10,12 +10,12 @@ st.markdown(
     body {
         background-color: #F5F5F5;  /* Light beige background for a natural feel */
         font-family: 'Arial', sans-serif;  /* Clean, modern font */
-        color: black;  /* Change text color to black */
+        color: #000000;  /* Set all text color to dark black */
     }
     /* Header styling */
     .header {
         background-color: #2E7D7D;  /* Muted teal for a calm appearance */
-        color: black;  /* Change header text color to black */
+        color: #000000;  /* Set header text color to dark black */
         padding: 10px;
         text-align: center;
         border-radius: 8px;
@@ -29,14 +29,14 @@ st.markdown(
         margin-bottom: 20px;
     }
     .navbar a {
-        color: black;  /* Change navigation link color to black */
+        color: #000000;  /* Set navigation link color to dark black */
         padding: 8px 15px;
         text-decoration: none;
         font-size: 18px;
     }
     .navbar a:hover {
         background-color: #FFA726;  /* Orange hover effect */
-        color: black;  /* Keep hover text color black */
+        color: #000000;  /* Keep hover text color dark black */
         border-radius: 5px;
     }
     /* Box and Panel styling */
@@ -47,11 +47,12 @@ st.markdown(
         padding: 15px;
         margin-bottom: 20px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        color: black;  /* Ensure content box text is black */
+        color: #000000;  /* Ensure content box text is dark black */
     }
     /* Sidebar styling */
     .sidebar .sidebar-content {
         background-color: #F5F5F5;
+        color: #000000;  /* Ensure sidebar text is dark black */
     }
     /* Button styling */
     .stButton button {
@@ -72,7 +73,7 @@ st.markdown(
         padding: 10px;
         margin-bottom: 20px;
         text-align: center;
-        color: black;  /* Ensure metric text is black */
+        color: #000000;  /* Ensure metric text is dark black */
     }
     </style>
     """,
@@ -95,10 +96,11 @@ st.markdown("""
     <div class="navbar">
         <a href="https://example.com/our-methodology" target="_blank">Our Methodology</a>
         <a href="https://example.com/our-mission" target="_blank">Our Mission</a>
+        <a href="#data-used" target="_self">Data Used</a>  <!-- Added Data Used link -->
     </div>
     """, unsafe_allow_html=True)
 # Load and process the data
-file_path = "Copy of Copy of Book1.csv"
+file_path = "Copy of Book1.csv.xlsx"
 data = pd.read_excel(file_path)
 # Metrics
 total_tweets = len(data)
@@ -117,11 +119,16 @@ for keyword, count in keyword_counts.items():
 st.markdown("### Tweet Counts per Location")
 location_counts = data['Location'].value_counts()
 st.bar_chart(location_counts)
-# Alternatively, show a table
-st.dataframe(location_counts.reset_index().rename(columns={'index': 'Location', 'Location': 'Tweet Count'}))
-# Load and display the data
-st.markdown("### Data Table")
-st.dataframe(data)
 # Footer Links
 st.markdown("### Learn more:")
 st.markdown("[Link to our paper](#)", unsafe_allow_html=True)
+# Initialize session state for toggling data display
+if 'show_data' not in st.session_state:
+    st.session_state['show_data'] = False
+# Button to toggle data visibility
+if st.button("Show/Hide Data Used"):
+    st.session_state['show_data'] = not st.session_state['show_data']
+# Data Used Section (conditionally rendered based on toggle state)
+if st.session_state['show_data']:
+    st.markdown("### Data Used")
+    st.dataframe(data)
