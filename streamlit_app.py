@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 # Set page configuration
-st.set_page_config(page_title="Dashboard", layout="wide")
+st.set_page_config(page_title="Mpox Dashboard", layout="wide")
 
 # Custom CSS for a natural theme and new font
 st.markdown(
