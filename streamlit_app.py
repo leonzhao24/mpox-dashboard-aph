@@ -86,6 +86,15 @@ st.markdown(
 file_path = "Copy of Book1.csv.xlsx"
 data = pd.read_excel(file_path)
 
+# Load the new file
+file_path_1 = "merged mpox data scraped.csv"  # Replace with the correct path or file name
+
+# Use pandas to read the new data file
+data_new_1 = pd.read_csv(file_path_1)
+
+# Combine both datasets
+combined_data = pd.concat([data, data_new_1])
+
 # Initialize session state
 if 'show_filtered_data' not in st.session_state:
     st.session_state['show_filtered_data'] = False
@@ -95,7 +104,10 @@ if 'filtered_data' not in st.session_state:
 # Sidebar for Advanced Search
 st.sidebar.markdown("## Advanced Search for Tweets")
 with st.sidebar.form(key='advanced_search_form'):
-    key_terms = st.text_input("Key Terms", "")
+    # Allow for multiple keywords by using more input fields
+    key_terms_1 = st.text_input("Key Term 1", "")
+    key_terms_2 = st.text_input("Key Term 2 (Optional)", "")
+    key_terms_3 = st.text_input("Key Term 3 (Optional)", "")
     time_period = st.selectbox("Time period", options=["2020", "2021", "2022"], index=0)
     reply_count = st.slider("Minimum Reply Count", 0, 50, 0)
     like_count = st.slider("Minimum Like Count", 0, 50, 0)
@@ -104,10 +116,14 @@ with st.sidebar.form(key='advanced_search_form'):
 
 if submit_button:
     # Filter the dataset based on the search criteria
-    filtered_data = data.copy()
+    filtered_data = combined_data.copy()
     
-    if key_terms:
-        filtered_data = filtered_data[filtered_data['CleanedText'].str.contains(key_terms, case=False, na=False)]
+    if key_terms_1:
+        filtered_data = filtered_data[filtered_data['CleanedText'].str.contains(key_terms_1, case=False, na=False)]
+    if key_terms_2:
+        filtered_data = filtered_data[filtered_data['CleanedText'].str.contains(key_terms_2, case=False, na=False)]
+    if key_terms_3:
+        filtered_data = filtered_data[filtered_data['CleanedText'].str.contains(key_terms_3, case=False, na=False)]
     if time_period:
         filtered_data = filtered_data[filtered_data['CreateDate'].str.contains(time_period, na=False)]
     if reply_count:
@@ -138,16 +154,16 @@ else:
         </div>
         """, unsafe_allow_html=True)
 
-    # Metrics
-    total_tweets = len(data)
-    total_cases_in_austin = data['Location'].str.contains("Austin", case=False, na=False).sum()
+    # Combined total number of tweets across both files
+    total_tweets = len(combined_data)
+    total_cases_in_austin = combined_data['Location'].str.contains("Austin", case=False, na=False).sum()
     col1, col2 = st.columns(2)
-    col1.metric("Total Mpox Tweets", total_tweets)
+    col1.metric("Total Number of Tweets", total_tweets)
     col2.metric("Total Cases in Austin", total_cases_in_austin)
 
     # Analyze keywords
     keywords = ["Monkey", "Pox", "Quarantine", "Crazy"]
-    keyword_counts = {kw: data['CleanedText'].str.contains(kw, case=False, na=False).sum() for kw in keywords}
+    keyword_counts = {kw: combined_data['CleanedText'].str.contains(kw, case=False, na=False).sum() for kw in keywords}
 
     # Content Boxes
     st.markdown("### List of Keywords")
@@ -156,7 +172,7 @@ else:
 
     # Display tweet counts per location
     st.markdown("### Tweet Counts per Location")
-    location_counts = data['Location'].value_counts()
+    location_counts = combined_data['Location'].value_counts()
     st.bar_chart(location_counts)
 
     # Footer Links
@@ -174,4 +190,4 @@ else:
     # Data Used Section (conditionally rendered based on toggle state)
     if st.session_state['show_data']:
         st.markdown("### Data Used")
-        st.dataframe(data)
+        st.dataframe(combined_data)
