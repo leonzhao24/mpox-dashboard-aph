@@ -4,20 +4,20 @@ import pandas as pd
 # Set page configuration
 st.set_page_config(page_title="Mpox Dashboard", layout="wide")
 
-# Custom CSS for a natural theme and new font
+# Custom CSS for a colorful and vibrant theme
 st.markdown(
     """
     <style>
     /* General body styling */
     body {
-        background-color: #F5F5F5;  /* Light beige background for a natural feel */
+        background-color: #F0F8FF;  /* AliceBlue background for a soft, bright feel */
         font-family: 'Arial', sans-serif;  /* Clean, modern font */
-        color: #000000;  /* Set all text color to dark black */
+        color: #333333;  /* Set all text color to dark gray */
     }
     /* Header styling */
     .header {
-        background-color: #2E7D7D;  /* Muted teal for a calm appearance */
-        color: #000000;  /* Set header text color to dark black */
+        background-color: #FF6347;  /* Tomato color for a vibrant header */
+        color: #FFFFFF;  /* Set header text color to white */
         padding: 10px;
         text-align: center;
         border-radius: 8px;
@@ -25,40 +25,40 @@ st.markdown(
     }
     /* Navigation bar styling */
     .navbar {
-        background-color: #2E7D7D;
+        background-color: #4682B4;  /* SteelBlue for the navbar */
         padding: 10px;
         border-radius: 8px;
         margin-bottom: 20px;
     }
     .navbar a {
-        color: #000000;  /* Set navigation link color to dark black */
+        color: #FFFFFF;  /* Set navigation link color to white */
         padding: 8px 15px;
         text-decoration: none;
         font-size: 18px;
     }
     .navbar a:hover {
-        background-color: #FFA726;  /* Orange hover effect */
-        color: #000000;  /* Keep hover text color dark black */
+        background-color: #FFA07A;  /* LightSalmon hover effect */
+        color: #FFFFFF;  /* Keep hover text color white */
         border-radius: 5px;
     }
     /* Box and Panel styling */
     .stMarkdown {
         background-color: #FFFFFF;
-        border: 1px solid #E0E0E0;
+        border: 2px solid #4682B4;  /* SteelBlue border */
         border-radius: 8px;
         padding: 15px;
         margin-bottom: 20px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        color: #000000;  /* Ensure content box text is dark black */
+        color: #333333;  /* Ensure content box text is dark gray */
     }
     /* Sidebar styling */
     .sidebar .sidebar-content {
-        background-color: #F5F5F5;
-        color: #000000;  /* Ensure sidebar text is dark black */
+        background-color: #F0F8FF;
+        color: #333333;  /* Ensure sidebar text is dark gray */
     }
     /* Button styling */
     .stButton button {
-        background-color: #2E7D7D;
+        background-color: #4682B4;
         color: white;
         border-radius: 5px;
         padding: 10px 20px;
@@ -66,16 +66,29 @@ st.markdown(
         transition: background-color 0.3s ease;
     }
     .stButton button:hover {
-        background-color: #FFA726;  /* Orange hover effect */
+        background-color: #FFA07A;  /* LightSalmon hover effect */
     }
     /* Metric box styling */
     .stMetric {
-        background-color: #E3F2FD;  /* Light blue background for metrics */
+        background-color: #FFFAF0;  /* FloralWhite background for metrics */
         border-radius: 8px;
         padding: 10px;
         margin-bottom: 20px;
         text-align: center;
-        color: #000000;  /* Ensure metric text is dark black */
+        color: #333333;  /* Ensure metric text is dark gray */
+    }
+    /* Enhanced keyword list styling */
+    .keyword-box {
+        background-color: #FFFFFF;
+        border: 1px solid #4682B4;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 10px;
+        color: #333333;
+        font-size: 16px;
+    }
+    .keyword-box h4 {
+        color: #FF6347;
     }
     </style>
     """,
@@ -94,6 +107,32 @@ data_new_1 = pd.read_csv(file_path_1)
 
 # Combine both datasets
 combined_data = pd.concat([data, data_new_1])
+
+# Helper function to get top 10 most frequent words for each year
+def get_top_10_words_by_year(df):
+    df['CreateDate'] = pd.to_datetime(df['CreateDate'], errors='coerce')
+    df['Year'] = df['CreateDate'].dt.year
+
+    # Explode words from 'CleanedText' column
+    df['CleanedText'] = df['CleanedText'].fillna("").str.split()
+    df = df.explode('CleanedText')
+
+    # Group by year and get the top 10 words for each year
+    top_words_per_year = (
+        df.groupby(['Year', 'CleanedText'])
+        .size()
+        .reset_index(name='Count')
+        .sort_values(by=['Year', 'Count'], ascending=[True, False])
+        .groupby('Year')
+        .head(10)
+    )
+
+    # Pivot table to get top words as columns
+    top_words_table = top_words_per_year.pivot_table(
+        index='Year', columns='CleanedText', values='Count', fill_value=0
+    )
+
+    return top_words_table
 
 # Initialize session state
 if 'show_filtered_data' not in st.session_state:
@@ -165,15 +204,25 @@ else:
     keywords = ["Monkey", "Pox", "Quarantine", "Crazy"]
     keyword_counts = {kw: combined_data['CleanedText'].str.contains(kw, case=False, na=False).sum() for kw in keywords}
 
-    # Content Boxes
+    # Enhanced Keyword Section
     st.markdown("### List of Keywords")
     for keyword, count in keyword_counts.items():
-        st.markdown(f"<div class='stMarkdown'>- **{keyword}**: {count} occurrences</div>", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="keyword-box">
+            <h4>{keyword}</h4>
+            <p>Occurrences: {count}</p>
+        </div>
+        """, unsafe_allow_html=True)
 
     # Display tweet counts per location
     st.markdown("### Tweet Counts per Location")
     location_counts = combined_data['Location'].value_counts()
     st.bar_chart(location_counts)
+
+    # Most Used Words Each Year Table
+    st.markdown("### Top 10 Most Used Words Each Year")
+    top_words = get_top_10_words_by_year(combined_data)
+    st.table(top_words)
 
     # Footer Links
     st.markdown("### Learn more:")
