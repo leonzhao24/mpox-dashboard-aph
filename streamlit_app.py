@@ -4,19 +4,78 @@ import pandas as pd
 # Set page configuration
 st.set_page_config(page_title="Mpox Dashboard", layout="wide")
 
-# Custom CSS for styling
+# Custom CSS for styling with updated colors
 st.markdown(
     """
     <style>
-    body {background-color: #F0F8FF; font-family: 'Arial', sans-serif; color: #333333;}
-    .header {background-color: #FF6347; color: #FFFFFF; padding: 10px; text-align: center; border-radius: 8px; margin-bottom: 20px;}
-    .navbar {background-color: #4682B4; padding: 10px; border-radius: 8px; margin-bottom: 20px;}
-    .navbar a {color: #FFFFFF; padding: 8px 15px; text-decoration: none; font-size: 18px;}
-    .navbar a:hover {background-color: #FFA07A; color: #FFFFFF; border-radius: 5px;}
-    .stButton button {background-color: #4682B4; color: white; border-radius: 5px; padding: 10px 20px; border: none;}
-    .stButton button:hover {background-color: #FFA07A;}
-    .keyword-box {background-color: #FFFFFF; border: 1px solid #4682B4; border-radius: 8px; padding: 10px; margin-bottom: 10px;}
-    .keyword-box h4 {color: #FF6347;}
+    /* General body styling */
+    body {
+        background-color: #A4B0F5;  /* Soft blue background for readability */
+        font-family: 'Arial', sans-serif;
+        color: #4464AD;  /* Dark blue text color */
+    }
+    /* Header styling */
+    .header {
+        background-color: #4464AD;  /* Strong blue for the header */
+        color: white;
+        padding: 10px;
+        text-align: center;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    /* Navigation bar styling */
+    .navbar {
+        background-color: #466995;  /* Muted steel blue for the navbar */
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    .navbar a {
+        color: white;
+        padding: 8px 15px;
+        text-decoration: none;
+        font-size: 18px;
+    }
+    .navbar a:hover {
+        background-color: #F58F29;  /* Orange hover effect */
+        color: white;
+        border-radius: 5px;
+    }
+    /* Keyword box styling */
+    .keyword-box {
+        background-color: white;
+        border: 2px solid #4464AD;  /* Dark blue border */
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 10px;
+        color: #7D4600;  /* Warm brown text */
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .keyword-box h4 {
+        color: #F58F29;  /* Vibrant orange for headings */
+    }
+    /* Button styling */
+    .stButton button {
+        background-color: #466995;  /* Steel blue */
+        color: white;
+        border-radius: 5px;
+        padding: 10px 20px;
+        border: none;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+    }
+    .stButton button:hover {
+        background-color: #F58F29;  /* Orange hover effect */
+    }
+    /* Metric box styling */
+    .stMetric {
+        background-color: #A4B0F5;  /* Soft blue background for metrics */
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 20px;
+        text-align: center;
+        color: #7D4600;  /* Warm brown text */
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -138,7 +197,7 @@ else:
     st.markdown("### Cluster Summary Table")
     st.dataframe(cluster_summary_df, width=800, height=400)
 
-       # Keyword analysis
+    # Keyword analysis
     st.markdown("### List of Keywords")
     keywords = ["Monkey", "Pox", "Vaccine", "Quarantine"]
     keyword_counts = {kw: combined_data_normalized['Text'].str.contains(kw, case=False, na=False).sum() for kw in keywords}
